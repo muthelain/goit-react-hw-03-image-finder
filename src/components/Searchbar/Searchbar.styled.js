@@ -29,6 +29,7 @@ export const SearchForm = styled.form`
   overflow: hidden;
 `;
 
+
 export const SearchFormButton = styled.button`
   display: inline-block;
   width: 48px;

@@ -19,5 +19,6 @@ export class App extends Component {
         <ImageGallery nameToFetch={this.state.nameToFetch}></ImageGallery>
       </AppContainer>
     );
+    
   }
 }

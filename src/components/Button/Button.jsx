@@ -12,3 +12,4 @@ export function LoadMoreBtn({ loadMoreData }) {
 LoadMoreBtn.propTypes = {
   loadMoreData: PropTypes.func.isRequired,
 };
+

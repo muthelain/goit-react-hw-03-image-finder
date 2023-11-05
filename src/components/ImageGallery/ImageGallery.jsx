@@ -29,6 +29,7 @@ export class ImageGallery extends Component {
       });
     }
   }
+  
   loadMoreData = () => {
     loadMoreDataFromAPI().then(data => {
       this.setState(prevState => ({

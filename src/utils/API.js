@@ -3,7 +3,7 @@ import axios from 'axios';
 const BASE_URL = 'https://pixabay.com/api/';
 const options = {
   params: {
-    key: '34774253-d36109085483ad06eaf8205ea',
+    key: '35267773-ba37c4c128e4d05a4427261b0',
     q: ``,
     image_type: 'photo',
     orientation: 'horizontal',
@@ -20,6 +20,7 @@ export async function getDataFromAPI(queryName) {
     .then(response => response.data);
   return data;
 }
+
 
 export async function loadMoreDataFromAPI() {
   options.params.page += 1;
