@@ -7,7 +7,7 @@ const options = {
     q: ``,
     image_type: 'photo',
     orientation: 'horizontal',
-    per_page: 12,
+    per_page: 18,
     page: 1,
   },
 };
@@ -20,7 +20,6 @@ export async function getDataFromAPI(queryName) {
     .then(response => response.data);
   return data;
 }
-
 
 export async function loadMoreDataFromAPI() {
   options.params.page += 1;

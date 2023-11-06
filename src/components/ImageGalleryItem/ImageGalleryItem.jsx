@@ -17,4 +17,3 @@ ImageGalleryItem.propTypes = {
   tags: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
 };
-
