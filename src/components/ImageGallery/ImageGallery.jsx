@@ -10,33 +10,47 @@ import { Modal } from 'components/Modal/Modal';
 export class ImageGallery extends Component {
   state = {
     arrayOfImages: [],
-    status: `idle`,
+    status: 'idle',
     isModalVisible: false,
     largeImg: '',
     tagsForModal: '',
+    currentPage: 1,
+    loading: false, 
   };
+
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.nameToFetch !== this.props.nameToFetch) {
       this.setState({ status: 'pending' });
 
       getDataFromAPI(this.props.nameToFetch).then(data => {
-        this.setState({ arrayOfImages: data.hits });
-        if (data.hits.length > 0) {
-          this.setState({ status: 'resolved' });
-          return;
-        }
+        this.setState({ arrayOfImages: data.hits, currentPage: 1, status: 'resolved' });
+      }).catch(error => {
+        console.error("Error fetching data:", error);
         this.setState({ status: 'rejected' });
       });
     }
+
+    if (
+      prevState.currentPage !== this.state.currentPage &&
+      this.state.status === 'resolved'
+    ) {
+      this.setState({ loading: true });
+
+      loadMoreDataFromAPI(this.state.currentPage).then(data => {
+        this.setState(prevState => ({
+          arrayOfImages: [...prevState.arrayOfImages, ...data.hits],
+          loading: false, 
+        }));
+      });
+    }
   }
-  
+
   loadMoreData = () => {
-    loadMoreDataFromAPI().then(data => {
-      this.setState(prevState => ({
-        arrayOfImages: [...prevState.arrayOfImages, ...data.hits],
-      }));
-    });
+    this.setState(prevState => ({
+      currentPage: prevState.currentPage + 1,
+    }));
   };
+
   onImageClick = e => {
     const imgToFind = this.state.arrayOfImages.find(
       img => img.webformatURL === e.currentTarget.src
@@ -47,19 +61,21 @@ export class ImageGallery extends Component {
     });
     this.setState({ isModalVisible: true });
   };
+
   modalClose = e => {
     this.setState({ isModalVisible: false });
   };
 
   render() {
-    const { arrayOfImages, status, isModalVisible, tagsForModal, largeImg } =
+    const { arrayOfImages, status, isModalVisible, tagsForModal, largeImg, loading } =
       this.state;
 
     if (status === 'pending') {
       return <LoaderSpinner />;
     }
+
     if (status === 'rejected') {
-      return;
+      return <div>Error loading data</div>;
     }
 
     if (status === 'resolved') {
@@ -78,6 +94,7 @@ export class ImageGallery extends Component {
                 );
               })}
           </ImageGalleryList>
+          {loading && <LoaderSpinner />} 
           <LoadMoreBtn loadMoreData={this.loadMoreData} />
           {isModalVisible && (
             <Modal
