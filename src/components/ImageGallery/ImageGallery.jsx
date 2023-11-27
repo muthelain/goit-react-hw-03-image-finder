@@ -15,19 +15,26 @@ export class ImageGallery extends Component {
     largeImg: '',
     tagsForModal: '',
     currentPage: 1,
-    loading: false, 
+    loading: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.nameToFetch !== this.props.nameToFetch) {
-      this.setState({ status: 'pending' });
+      this.setState({ status: 'pending', currentPage: 1 });
 
-      getDataFromAPI(this.props.nameToFetch).then(data => {
-        this.setState({ arrayOfImages: data.hits, currentPage: 1, status: 'resolved' });
-      }).catch(error => {
-        console.error("Error fetching data:", error);
-        this.setState({ status: 'rejected' });
-      });
+      getDataFromAPI(this.props.nameToFetch, 1)
+        .then(data => {
+          this.setState({ arrayOfImages: data.hits });
+          if (data.hits.length > 0) {
+            this.setState({ status: 'resolved' });
+          } else {
+            this.setState({ status: 'rejected' });
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          this.setState({ status: 'rejected' });
+        });
     }
 
     if (
@@ -36,12 +43,13 @@ export class ImageGallery extends Component {
     ) {
       this.setState({ loading: true });
 
-      loadMoreDataFromAPI(this.state.currentPage).then(data => {
-        this.setState(prevState => ({
-          arrayOfImages: [...prevState.arrayOfImages, ...data.hits],
-          loading: false, 
-        }));
-      });
+      loadMoreDataFromAPI(this.props.nameToFetch, this.state.currentPage)
+        .then(data => {
+          this.setState(prevState => ({
+            arrayOfImages: [...prevState.arrayOfImages, ...data.hits],
+            loading: false,
+          }));
+        });
     }
   }
 
@@ -58,11 +66,11 @@ export class ImageGallery extends Component {
     this.setState({
       largeImg: imgToFind.largeImageURL,
       tagsForModal: imgToFind.tags,
+      isModalVisible: true,
     });
-    this.setState({ isModalVisible: true });
   };
 
-  modalClose = e => {
+  modalClose = () => {
     this.setState({ isModalVisible: false });
   };
 
@@ -75,7 +83,7 @@ export class ImageGallery extends Component {
     }
 
     if (status === 'rejected') {
-      return <div>Error loading data</div>;
+      return <div>No images found</div>;
     }
 
     if (status === 'resolved') {
@@ -83,18 +91,16 @@ export class ImageGallery extends Component {
         <>
           <ImageGalleryList>
             {arrayOfImages.length > 0 &&
-              arrayOfImages.map(img => {
-                return (
-                  <ImageGalleryItem
-                    onClick={this.onImageClick}
-                    tags={img.tags}
-                    webformatURL={img.webformatURL}
-                    key={img.id}
-                  />
-                );
-              })}
+              arrayOfImages.map(img => (
+                <ImageGalleryItem
+                  onClick={this.onImageClick}
+                  tags={img.tags}
+                  webformatURL={img.webformatURL}
+                  key={img.id}
+                />
+              ))}
           </ImageGalleryList>
-          {loading && <LoaderSpinner />} 
+          {loading && <LoaderSpinner />}
           <LoadMoreBtn loadMoreData={this.loadMoreData} />
           {isModalVisible && (
             <Modal
